@@ -43,7 +43,7 @@ jobs:
       - name: k6 Load Test
         uses: grafana/k6-action@v0.2.0
         with:
-          filename: ${{github.workspace }}/test/k6/loadtest.js
+          filename: ${{ github.workspace }}/test/k6/loadtest.js
           flags: --vus 50 --duration 10s
   siteSpeedIo:
     needs: [k6LoadTest, gitleaks, postman, apiRobotTest]
@@ -55,4 +55,16 @@ jobs:
       - name: SiteSpeedIo Run
         run: |
           docker run --shm-size=1g --rm sitespeedio/sitespeed.io https://procesor2017.github.io/gitHubWorkShop/ -b chrome
-          
+  playwright:
+    needs: siteSpeedIo
+    name: Playwright - Check klingo
+    runs-on: ubuntu-latest
+    steps:
+      - name: Code Checkout
+        uses: actions/checkout@v2
+      - name: Run Playwright
+        run: |
+          cd ${{ github.workspace }}/test/playwright
+          npm install
+          npm update
+          npm test
